@@ -6,7 +6,7 @@
     function key(d) { return d.name; }
 
     // Map Dimensions
-    var width = 1100, height = 175;
+    var width = 1100, height = 140;
 
     // Create the SVG container and set the origin.
     var map = d3.select("#map").append("svg")
@@ -14,66 +14,10 @@
         .attr("height", height)
         .append("g");
 
-    //legend for population size
-    // draw legend colored rectangles
-    map.append("rect")
-        .attr("x", 225)
-        //.attr("y", height-230)
-        .attr("y", 0)
-        .attr("width", 260)
-        .attr("height", 175)
-        .attr("fill", "lightgrey")
-        .style("stroke-size", "1px");
-
-    map.append("circle")
-        .attr("r", 10)
-        .attr("cx", 425)
-        //.attr("cy", height-215)
-        .attr("cy", 160)
-        .style("fill", "white");
-    
-    map.append("circle")
-        .attr("r", 20)
-        .attr("cx", 425)
-        //.attr("cy", height-190)
-        .attr("cy", 130)
-        .style("fill", "white");
-
-    map.append("circle")
-        .attr("r", 50)
-        .attr("cx", 425)
-        //.attr("cy", height-120)
-        .attr("cy", 60)
-        .style("fill", "white");
-
-    map.append("text")
-        .attr("class", "label")
-        .attr("x", 360)
-        //.attr("y", height-212)
-        .attr("y", 165)
-        .style("text-anchor", "end")
-        .text("$650 debt per Capita");
-
-    map.append("text")
-        .attr("class", "label")
-        .attr("x", 360)
-        //.attr("y", height-187)
-        .attr("y", 130)
-        .style("text-anchor", "end")
-        .text("$5000 debt per Capita");
-
-    map.append("text")
-        .attr("class", "label")
-        .attr("x", 360)
-        //.attr("y", height-117)
-        .attr("y", 65)
-        .style("text-anchor", "end")
-        .text("$12,500 debt per Capita");
-
     // D3 Projection
     var projection = d3.geo.albersUsa()
-        .translate([width-200, 90])
-        .scale([300]);
+        .translate([width/2, 65])
+        .scale([250]);
 
     // Define path generator
     var path = d3.geo.path()
@@ -183,7 +127,63 @@
         .attr("y", 6)
         .attr("dy", ".75em")
         .attr("transform", "rotate(-90)")
-        .text("Income (billions)");
+        .text("Revenue (billions)");
+
+    //legend for population size
+    // draw legend colored rectangles
+    svg.append("rect")
+        .attr("x", 25)
+        //.attr("y", height-230)
+        .attr("y", 0)
+        .attr("width", 260)
+        .attr("height", 175)
+        .attr("fill", "lightgrey")
+        .style("stroke-size", "1px");
+
+    svg.append("circle")
+        .attr("r", 10)
+        .attr("cx", 225)
+        //.attr("cy", height-215)
+        .attr("cy", 160)
+        .style("fill", "white");
+    
+    svg.append("circle")
+        .attr("r", 20)
+        .attr("cx", 225)
+        //.attr("cy", height-190)
+        .attr("cy", 130)
+        .style("fill", "white");
+
+    svg.append("circle")
+        .attr("r", 50)
+        .attr("cx", 225)
+        //.attr("cy", height-120)
+        .attr("cy", 60)
+        .style("fill", "white");
+
+    svg.append("text")
+        .attr("class", "label")
+        .attr("x", 160)
+        //.attr("y", height-212)
+        .attr("y", 165)
+        .style("text-anchor", "end")
+        .text("$650 debt per Capita");
+
+    svg.append("text")
+        .attr("class", "label")
+        .attr("x", 160)
+        //.attr("y", height-187)
+        .attr("y", 130)
+        .style("text-anchor", "end")
+        .text("$5000 debt per Capita");
+
+    svg.append("text")
+        .attr("class", "label")
+        .attr("x", 160)
+        //.attr("y", height-117)
+        .attr("y", 65)
+        .style("text-anchor", "end")
+        .text("$12,500 debt per Capita");
     
     // Add the year label; the value is set on transition.
     var label = svg.append("text")
@@ -338,7 +338,7 @@
         d3.select("svg").remove();
         
         // Map Dimensions
-        var width = 1100, height = 175;
+        var width = 1100, height = 140;
 
         // Create the SVG container and set the origin.
         var map = d3.select("#map").append("svg")
@@ -346,66 +346,10 @@
             .attr("height", height)
             .append("g");
 
-        //legend for population size
-        // draw legend colored rectangles
-        map.append("rect")
-            .attr("x", 225)
-            //.attr("y", height-230)
-            .attr("y", 0)
-            .attr("width", 260)
-            .attr("height", 175)
-            .attr("fill", "lightgrey")
-            .style("stroke-size", "1px");
-
-        map.append("circle")
-            .attr("r", 10)
-            .attr("cx", 425)
-            //.attr("cy", height-215)
-            .attr("cy", 160)
-            .style("fill", "white");
-
-        map.append("circle")
-            .attr("r", 20)
-            .attr("cx", 425)
-            //.attr("cy", height-190)
-            .attr("cy", 130)
-            .style("fill", "white");
-
-        map.append("circle")
-            .attr("r", 50)
-            .attr("cx", 425)
-            //.attr("cy", height-120)
-            .attr("cy", 60)
-            .style("fill", "white");
-
-        map.append("text")
-            .attr("class", "label")
-            .attr("x", 360)
-            //.attr("y", height-212)
-            .attr("y", 165)
-            .style("text-anchor", "end")
-            .text("$650 debt per Capita");
-
-        map.append("text")
-            .attr("class", "label")
-            .attr("x", 360)
-            //.attr("y", height-187)
-            .attr("y", 130)
-            .style("text-anchor", "end")
-            .text("$5000 debt per Capita");
-
-        map.append("text")
-            .attr("class", "label")
-            .attr("x", 360)
-            //.attr("y", height-117)
-            .attr("y", 65)
-            .style("text-anchor", "end")
-            .text("$12,500 debt per Capita");
-
         // D3 Projection
         var projection = d3.geo.albersUsa()
-            .translate([width-200, 90])
-            .scale([300]);
+            .translate([width/2, 65])
+            .scale([250]);
 
         // Define path generator
         var path = d3.geo.path()
@@ -467,7 +411,7 @@
         });
         
         // Chart dimensions.
-        var margin2 = {top: 5, right: 20, bottom: 30, left: 50},
+        var margin2 = {top: 5, right: 20, bottom: 30, left: 40},
             width = 1024 - margin2.right - margin2.left,
             height = 550 - margin2.top - margin2.bottom;
 
@@ -524,7 +468,63 @@
             .attr("y", 6)
             .attr("dy", ".75em")
             .attr("transform", "rotate(-90)")
-            .text("Income (billions)");
+            .text("Revenue (billions)");
+        
+        //legend for population size
+        // draw legend colored rectangles
+        svg.append("rect")
+            .attr("x", 25)
+            //.attr("y", height-230)
+            .attr("y", 0)
+            .attr("width", 260)
+            .attr("height", 175)
+            .attr("fill", "lightgrey")
+            .style("stroke-size", "1px");
+
+        svg.append("circle")
+            .attr("r", 10)
+            .attr("cx", 225)
+            //.attr("cy", height-215)
+            .attr("cy", 160)
+            .style("fill", "white");
+
+        svg.append("circle")
+            .attr("r", 20)
+            .attr("cx", 225)
+            //.attr("cy", height-190)
+            .attr("cy", 130)
+            .style("fill", "white");
+
+        svg.append("circle")
+            .attr("r", 50)
+            .attr("cx", 225)
+            //.attr("cy", height-120)
+            .attr("cy", 60)
+            .style("fill", "white");
+
+        svg.append("text")
+            .attr("class", "label")
+            .attr("x", 160)
+            //.attr("y", height-212)
+            .attr("y", 165)
+            .style("text-anchor", "end")
+            .text("$650 debt per Capita");
+
+        svg.append("text")
+            .attr("class", "label")
+            .attr("x", 160)
+            //.attr("y", height-187)
+            .attr("y", 130)
+            .style("text-anchor", "end")
+            .text("$5000 debt per Capita");
+
+        svg.append("text")
+            .attr("class", "label")
+            .attr("x", 160)
+            //.attr("y", height-117)
+            .attr("y", 65)
+            .style("text-anchor", "end")
+            .text("$12,500 debt per Capita");
 
         // Add the year label; the value is set on transition.
         var label = svg.append("text")
@@ -680,7 +680,7 @@
         d3.select("svg").remove();
         
         // Map Dimensions
-        var width = 1100, height = 175;
+        var width = 1100, height = 140;
 
         // Create the SVG container and set the origin.
         var map = d3.select("#map").append("svg")
@@ -688,66 +688,10 @@
             .attr("height", height)
             .append("g");
 
-        //legend for population size
-        // draw legend colored rectangles
-        map.append("rect")
-            .attr("x", 225)
-            //.attr("y", height-230)
-            .attr("y", 0)
-            .attr("width", 260)
-            .attr("height", 175)
-            .attr("fill", "lightgrey")
-            .style("stroke-size", "1px");
-
-        map.append("circle")
-            .attr("r", 10)
-            .attr("cx", 425)
-            //.attr("cy", height-215)
-            .attr("cy", 160)
-            .style("fill", "white");
-
-        map.append("circle")
-            .attr("r", 20)
-            .attr("cx", 425)
-            //.attr("cy", height-190)
-            .attr("cy", 130)
-            .style("fill", "white");
-
-        map.append("circle")
-            .attr("r", 50)
-            .attr("cx", 425)
-            //.attr("cy", height-120)
-            .attr("cy", 60)
-            .style("fill", "white");
-
-        map.append("text")
-            .attr("class", "label")
-            .attr("x", 360)
-            //.attr("y", height-212)
-            .attr("y", 165)
-            .style("text-anchor", "end")
-            .text("$650 debt per Capita");
-
-        map.append("text")
-            .attr("class", "label")
-            .attr("x", 360)
-            //.attr("y", height-187)
-            .attr("y", 130)
-            .style("text-anchor", "end")
-            .text("$5000 debt per Capita");
-
-        map.append("text")
-            .attr("class", "label")
-            .attr("x", 360)
-            //.attr("y", height-117)
-            .attr("y", 65)
-            .style("text-anchor", "end")
-            .text("$12,500 debt per Capita");
-
         // D3 Projection
         var projection = d3.geo.albersUsa()
-            .translate([width-200, 90])
-            .scale([300]);
+            .translate([width/2, 65])
+            .scale([250]);
 
         // Define path generator
         var path = d3.geo.path()
@@ -801,7 +745,7 @@
         });
         
         // Chart dimensions.
-        var margin2 = {top: 5, right: 20, bottom: 30, left: 50},
+        var margin2 = {top: 5, right: 20, bottom: 30, left: 40},
             width = 1024 - margin2.right - margin2.left,
             height = 550 - margin2.top - margin2.bottom;
 
@@ -857,7 +801,64 @@
             .attr("y", 6)
             .attr("dy", ".75em")
             .attr("transform", "rotate(-90)")
-            .text("Income (billions)");
+            .text("Revenue (billions)");
+        
+        //legend for population size
+        // draw legend colored rectangles
+        svg.append("rect")
+            .attr("x", 25)
+            //.attr("y", height-230)
+            .attr("y", 0)
+            .attr("width", 260)
+            .attr("height", 175)
+            .attr("fill", "lightgrey")
+            .style("stroke-size", "1px");
+
+        svg.append("circle")
+            .attr("r", 10)
+            .attr("cx", 225)
+            //.attr("cy", height-215)
+            .attr("cy", 160)
+            .style("fill", "white");
+
+        svg.append("circle")
+            .attr("r", 20)
+            .attr("cx", 225)
+            //.attr("cy", height-190)
+            .attr("cy", 130)
+            .style("fill", "white");
+
+        svg.append("circle")
+            .attr("r", 50)
+            .attr("cx", 225)
+            //.attr("cy", height-120)
+            .attr("cy", 60)
+            .style("fill", "white");
+
+        svg.append("text")
+            .attr("class", "label")
+            .attr("x", 160)
+            //.attr("y", height-212)
+            .attr("y", 165)
+            .style("text-anchor", "end")
+            .text("$650 debt per Capita");
+
+        svg.append("text")
+            .attr("class", "label")
+            .attr("x", 160)
+            //.attr("y", height-187)
+            .attr("y", 130)
+            .style("text-anchor", "end")
+            .text("$5000 debt per Capita");
+
+        svg.append("text")
+            .attr("class", "label")
+            .attr("x", 160)
+            //.attr("y", height-117)
+            .attr("y", 65)
+            .style("text-anchor", "end")
+            .text("$12,500 debt per Capita");
+    
 
         // Add the year label; the value is set on transition.
         var label = svg.append("text")
@@ -1013,7 +1014,7 @@
         d3.select("svg").remove();
         
         // Map Dimensions
-        var width = 1100, height = 175;
+        var width = 1100, height = 140;
 
         // Create the SVG container and set the origin.
         var map = d3.select("#map").append("svg")
@@ -1021,66 +1022,10 @@
             .attr("height", height)
             .append("g");
 
-        //legend for population size
-        // draw legend colored rectangles
-        map.append("rect")
-            .attr("x", 225)
-            //.attr("y", height-230)
-            .attr("y", 0)
-            .attr("width", 260)
-            .attr("height", 175)
-            .attr("fill", "lightgrey")
-            .style("stroke-size", "1px");
-
-        map.append("circle")
-            .attr("r", 10)
-            .attr("cx", 425)
-            //.attr("cy", height-215)
-            .attr("cy", 160)
-            .style("fill", "white");
-
-        map.append("circle")
-            .attr("r", 20)
-            .attr("cx", 425)
-            //.attr("cy", height-190)
-            .attr("cy", 130)
-            .style("fill", "white");
-
-        map.append("circle")
-            .attr("r", 50)
-            .attr("cx", 425)
-            //.attr("cy", height-120)
-            .attr("cy", 60)
-            .style("fill", "white");
-
-        map.append("text")
-            .attr("class", "label")
-            .attr("x", 360)
-            //.attr("y", height-212)
-            .attr("y", 165)
-            .style("text-anchor", "end")
-            .text("$650 debt per Capita");
-
-        map.append("text")
-            .attr("class", "label")
-            .attr("x", 360)
-            //.attr("y", height-187)
-            .attr("y", 130)
-            .style("text-anchor", "end")
-            .text("$5000 debt per Capita");
-
-        map.append("text")
-            .attr("class", "label")
-            .attr("x", 360)
-            //.attr("y", height-117)
-            .attr("y", 65)
-            .style("text-anchor", "end")
-            .text("$12,500 debt per Capita");
-
         // D3 Projection
         var projection = d3.geo.albersUsa()
-            .translate([width-200, 90])
-            .scale([300]);
+            .translate([width/2, 65])
+            .scale([250]);
 
         // Define path generator
         var path = d3.geo.path()
@@ -1134,7 +1079,7 @@
         });
 
         // Chart dimensions.
-        var margin2 = {top: 5, right: 20, bottom: 30, left: 50},
+        var margin2 = {top: 5, right: 20, bottom: 30, left: 40},
             width = 1024 - margin2.right - margin2.left,
             height = 550 - margin2.top - margin2.bottom;
 
@@ -1190,8 +1135,64 @@
             .attr("y", 6)
             .attr("dy", ".75em")
             .attr("transform", "rotate(-90)")
-            .text("Income (billions)");
+            .text("Revenue (billions)");
+        
+        //legend for population size
+        // draw legend colored rectangles
+        svg.append("rect")
+            .attr("x", 25)
+            //.attr("y", height-230)
+            .attr("y", 0)
+            .attr("width", 260)
+            .attr("height", 175)
+            .attr("fill", "lightgrey")
+            .style("stroke-size", "1px");
 
+        svg.append("circle")
+            .attr("r", 10)
+            .attr("cx", 225)
+            //.attr("cy", height-215)
+            .attr("cy", 160)
+            .style("fill", "white");
+
+        svg.append("circle")
+            .attr("r", 20)
+            .attr("cx", 225)
+            //.attr("cy", height-190)
+            .attr("cy", 130)
+            .style("fill", "white");
+
+        svg.append("circle")
+            .attr("r", 50)
+            .attr("cx", 225)
+            //.attr("cy", height-120)
+            .attr("cy", 60)
+            .style("fill", "white");
+
+        svg.append("text")
+            .attr("class", "label")
+            .attr("x", 160)
+            //.attr("y", height-212)
+            .attr("y", 165)
+            .style("text-anchor", "end")
+            .text("$650 debt per Capita");
+
+        svg.append("text")
+            .attr("class", "label")
+            .attr("x", 160)
+            //.attr("y", height-187)
+            .attr("y", 130)
+            .style("text-anchor", "end")
+            .text("$5000 debt per Capita");
+
+        svg.append("text")
+            .attr("class", "label")
+            .attr("x", 160)
+            //.attr("y", height-117)
+            .attr("y", 65)
+            .style("text-anchor", "end")
+            .text("$12,500 debt per Capita");
+    
         // Add the year label; the value is set on transition.
         var label = svg.append("text")
             .attr("class", "year label")
