@@ -4,11 +4,132 @@
     function radius(d) { return d.perCapita; }
     function color(d) { return d.region; }
     function key(d) { return d.name; }
-		
+
+    // Map Dimensions
+    var width = 1100, height = 175;
+
+    // Create the SVG container and set the origin.
+    var map = d3.select("#map").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g");
+
+    //legend for population size
+    // draw legend colored rectangles
+    map.append("rect")
+        .attr("x", 225)
+        //.attr("y", height-230)
+        .attr("y", 0)
+        .attr("width", 260)
+        .attr("height", 175)
+        .attr("fill", "lightgrey")
+        .style("stroke-size", "1px");
+
+    map.append("circle")
+        .attr("r", 10)
+        .attr("cx", 425)
+        //.attr("cy", height-215)
+        .attr("cy", 160)
+        .style("fill", "white");
+    
+    map.append("circle")
+        .attr("r", 20)
+        .attr("cx", 425)
+        //.attr("cy", height-190)
+        .attr("cy", 130)
+        .style("fill", "white");
+
+    map.append("circle")
+        .attr("r", 50)
+        .attr("cx", 425)
+        //.attr("cy", height-120)
+        .attr("cy", 60)
+        .style("fill", "white");
+
+    map.append("text")
+        .attr("class", "label")
+        .attr("x", 360)
+        //.attr("y", height-212)
+        .attr("y", 165)
+        .style("text-anchor", "end")
+        .text("$650 debt per Capita");
+
+    map.append("text")
+        .attr("class", "label")
+        .attr("x", 360)
+        //.attr("y", height-187)
+        .attr("y", 130)
+        .style("text-anchor", "end")
+        .text("$5000 debt per Capita");
+
+    map.append("text")
+        .attr("class", "label")
+        .attr("x", 360)
+        //.attr("y", height-117)
+        .attr("y", 65)
+        .style("text-anchor", "end")
+        .text("$12,500 debt per Capita");
+
+    // D3 Projection
+    var projection = d3.geo.albersUsa()
+        .translate([width-200, 90])
+        .scale([300]);
+
+    // Define path generator
+    var path = d3.geo.path()
+        .projection(projection);
+
+    var colorScale = d3.scale.linear()                  .range(["#FFFFFF","#32CD32","#FF0000","#0000CD","#0000FF","#3CB371","#FFA500","#FF0000",
+        "#D2691E","#A0522D","#FFD700"]);
+
+    d3.csv("states.csv", function(data){
+        colorScale.domain([0,1,2,3,4,5,6,7,8,9,10]);
+
+        d3.json("us-states.json", function(json) {
+            // Loop through each state data value in the .csv file
+            for (var i = 0; i < data.length; i++) {
+                // Grab State Name
+                var dataState = data[i].state;
+                // Grab data value 
+                var dataValue = data[i].addColor;
+                // Find the corresponding state inside the GeoJSON
+                for (var j = 0; j < json.features.length; j++)  {
+                    var jsonState = json.features[j].properties.name;
+                    if (dataState == jsonState) {
+                        // Copy the data value into the JSON
+                        json.features[j].properties.addColor = dataValue; 
+                        // Stop looking through the JSON
+                        break;
+                    }
+                }
+            }
+
+            // Bind the data to the SVG and create one path per GeoJSON feature
+            map.selectAll("path")
+                .data(json.features)
+                .enter()
+                .append("path")
+                .attr("d", path)
+                .style("stroke", "#000000")
+                .style("stroke-width", "1")
+                .style("fill", function(d) {
+                    // Get data value
+                    var value = d.properties.addColor;
+                    if (value) {
+                        //If value exists…
+                        return colorScale(value);
+                    } else {
+                        //If value is undefined…
+                        return "rgb(213,222,217)";
+                    }
+                });
+        });
+    });
+
     // Chart dimensions.
-    var margin = {top: 20, right: 40, bottom: 30, left: 50},
-        width = 1024 - margin.right,
-        height = 550 - margin.top - margin.bottom;
+    var margin2 = {top: 5, right: 20, bottom: 30, left: 40},
+        width = 1024 - margin2.left - margin2.right,
+        height = 550 - margin2.top - margin2.bottom;
     
     // Various scales. These domains make assumptions of data, naturally.
     var xScale = d3.scale.linear().domain([1, 60])
@@ -17,8 +138,8 @@
         .range([height, 0]);
     var radiusScale = d3.scale.sqrt().domain([0, 12500])
         .range([0, 50]);
-    var colorScale = d3.scale.ordinal().domain(["1","2","3","4","5","6","7","8","9","10"])
-        .range(["#4169E1","#9ACD32","#DC143C","#008000","#000080","#DAA520","#FFD700","#8A2BE2","#A0522D","#F0E68C"]);
+    var colorScale2 = d3.scale.ordinal().domain(["1","2","3","4","5","6","7","8","9","10"])  .range(["#32CD32","#FF0000","#0000CD","#0000FF","#3CB371","#FFA500","#FF0000","#D2691E",
+                                                    "#A0522D","#FFD700"]);
 		
     // The x & y axes.
     var xAxis = d3.svg.axis()
@@ -31,10 +152,10 @@
 		
     // Create the SVG container and set the origin.
     var svg = d3.select("#chart").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", width + margin2.left + margin2.right)
+        .attr("height", height + margin2.top + margin2.bottom)
         .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
     
     // Add the x-axis.
     svg.append("g")
@@ -72,239 +193,6 @@
         .attr("x", width)
         .text(2000);
 
-    // draw legend colored rectangles
-    svg.append("rect")
-        .attr("x", width-670)
-        //.attr("y", height-230)
-        .attr("y", height-500)
-        .attr("width", 220)
-        .attr("height", 270)
-        .attr("fill", "lightgrey")
-        .style("stroke-size", "1px");
-
-    svg.append("circle")
-        .attr("r", 10)
-        .attr("cx", width-470)
-        //.attr("cy", height-215)
-        .attr("cy", height-480)
-        .style("fill", "#4169E1");
-    
-    svg.append("circle")
-        .attr("r", 10)
-        .attr("cx", width-470)
-        //.attr("cy", height-190)
-        .attr("cy", height-455)
-        .style("fill", "#9ACD32");
-
-    svg.append("circle")
-        .attr("r", 10)
-        .attr("cx", width-470)
-        //.attr("cy", height-120)
-        .attr("cy", height-430)
-        .style("fill", "#DC143C");
-
-    svg.append("circle")
-        .attr("r", 10)
-        .attr("cx", width-470)
-        //.attr("cy", height-120)
-        .attr("cy", height-405)
-        .style("fill", "#008000");
-
-    svg.append("circle")
-        .attr("r", 10)
-        .attr("cx", width-470)
-        //.attr("cy", height-120)
-        .attr("cy", height-380)
-        .style("fill", "#000080");
-
-    svg.append("circle")
-        .attr("r", 10)
-        .attr("cx", width-470)
-        //.attr("cy", height-120)
-        .attr("cy", height-355)
-        .style("fill", "#DAA520");
-
-    svg.append("circle")
-        .attr("r", 10)
-        .attr("cx", width-470)
-        //.attr("cy", height-120)
-        .attr("cy", height-330)
-        .style("fill", "#FFD700");
-
-    svg.append("circle")
-        .attr("r", 10)
-        .attr("cx", width-470)
-        //.attr("cy", height-120)
-        .attr("cy", height-305)
-        .style("fill", "#8A2BE2");
-
-    svg.append("circle")
-        .attr("r", 10)
-        .attr("cx", width-470)
-        //.attr("cy", height-120)
-        .attr("cy", height-280)
-        .style("fill", "#A0522D");
-
-    svg.append("circle")
-        .attr("r", 10)
-        .attr("cx", width-470)
-        //.attr("cy", height-120)
-        .attr("cy", height-255)
-        .style("fill", "#F0E68C");
-
-    svg.append("text")
-        .attr("class", "label")
-        .attr("x", width -520)
-        //.attr("y", height-212)
-        .attr("y", height-475)
-        .style("text-anchor", "end")
-        .text("Connecticut");
-
-    svg.append("text")
-        .attr("class", "label")
-        .attr("x", width -520)
-        //.attr("y", height-187)
-        .attr("y", height-450)
-        .style("text-anchor", "end")
-        .text("Alaska");
-
-    svg.append("text")
-        .attr("class", "label")
-        .attr("x", width -520)
-        //.attr("y", height-117)
-        .attr("y", height-425)
-        .style("text-anchor", "end")
-        .text("Massachusets");
-
-    svg.append("text")
-        .attr("class", "label")
-        .attr("x", width -520)
-        //.attr("y", height-117)
-        .attr("y", height-400)
-        .style("text-anchor", "end")
-        .text("Rhode Island");
-
-    svg.append("text")
-        .attr("class", "label")
-        .attr("x", width -520)
-        //.attr("y", height-117)
-        .attr("y", height-375)
-        .style("text-anchor", "end")
-        .text("New Jersey");
-
-    svg.append("text")
-        .attr("class", "label")
-        .attr("x", width -520)
-        //.attr("y", height-117)
-        .attr("y", height-350)
-        .style("text-anchor", "end")
-        .text("Tennessee");
-
-    svg.append("text")
-        .attr("class", "label")
-        .attr("x", width -520)
-        //.attr("y", height-117)
-        .attr("y", height-325)
-        .style("text-anchor", "end")
-        .text("Nevada");
-
-    svg.append("text")
-        .attr("class", "label")
-        .attr("x", width -520)
-        //.attr("y", height-117)
-        .attr("y", height-300)
-        .style("text-anchor", "end")
-        .text("Nebraska");
-
-    svg.append("text")
-        .attr("class", "label")
-        .attr("x", width -520)
-        //.attr("y", height-117)
-        .attr("y", height-275)
-        .style("text-anchor", "end")
-        .text("Wyoming");
-
-    svg.append("text")
-        .attr("class", "label")
-        .attr("x", width -520)
-        //.attr("y", height-117)
-        .attr("y", height-250)
-        .style("text-anchor", "end")
-        .text("Georgia");
-
-    //legend for population size
-    // draw legend colored rectangles
-    svg.append("rect")
-        .attr("x", 25)
-        //.attr("y", height-230)
-        .attr("y", 10)
-        .attr("width", 260)
-        .attr("height", 175)
-        .attr("fill", "lightgrey")
-        .style("stroke-size", "1px");
-
-    svg.append("circle")
-        .attr("r", 10)
-        .attr("cx", 225)
-        //.attr("cy", height-215)
-        .attr("cy", 173)
-        .style("fill", "white");
-    
-    svg.append("circle")
-        .attr("r", 20)
-        .attr("cx", 225)
-        //.attr("cy", height-190)
-        .attr("cy", 142)
-        .style("fill", "white");
-
-    svg.append("circle")
-        .attr("r", 50)
-        .attr("cx", 225)
-        //.attr("cy", height-120)
-        .attr("cy", 72)
-        .style("fill", "white");
-
-    svg.append("text")
-        .attr("class", "label")
-        .attr("x", 160)
-        //.attr("y", height-212)
-        .attr("y", 173)
-        .style("text-anchor", "end")
-        .text("$650 debt per Capita");
-
-    svg.append("text")
-        .attr("class", "label")
-        .attr("x", 160)
-        //.attr("y", height-187)
-        .attr("y", 147)
-        .style("text-anchor", "end")
-        .text("$5000 debt per Capita");
-
-    svg.append("text")
-        .attr("class", "label")
-        .attr("x", 160)
-        //.attr("y", height-117)
-        .attr("y", 77)
-        .style("text-anchor", "end")
-        .text("$12,500 debt per Capita");
-
-    /*var lineData = [{x:1,y:1}, {x:10,y:10}, {x:20,y:20}, {x:30,y:30}, {x:40,y:40}, {x:50,y:50},     {x:60,y:60}];
-
-    var line = d3.svg.line()
-        .x(function(d) {
-            return xScale(d.x);
-        })
-        .y(function(d) {
-            return yScale(d.y);
-        })
-        .interpolate("basis");
-
-    svg.append("path")
-      .attr("d", line(lineData))
-      .attr("stroke", "black")
-      .attr("stroke-width", .5)
-      .attr("fill", "none");*/
-
     var div = d3.select("#chart").append("div")
         .attr("class", "tooltip")
         .style("opacity", 0);
@@ -323,7 +211,7 @@
             .data(interpolateData(2000))
             .enter().append("circle")
             .attr("class", "dot")
-            .style("fill", function(d) { return colorScale(color(d)); })
+            .style("fill", function(d) { return colorScale2(color(d)); })
             .call(position)
             .sort(order)
             .on("mouseover", function(d) {
@@ -447,11 +335,141 @@
 
     function showAllTen(){
         d3.select("svg").remove();
+        d3.select("svg").remove();
         
-        /*// Chart dimensions.
-        var margin = {top: 20, right: 40, bottom: 30, left: 50},
-            width = 1024 - margin.right,
-            height = 550 - margin.top - margin.bottom;
+        // Map Dimensions
+        var width = 1100, height = 175;
+
+        // Create the SVG container and set the origin.
+        var map = d3.select("#map").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g");
+
+        //legend for population size
+        // draw legend colored rectangles
+        map.append("rect")
+            .attr("x", 225)
+            //.attr("y", height-230)
+            .attr("y", 0)
+            .attr("width", 260)
+            .attr("height", 175)
+            .attr("fill", "lightgrey")
+            .style("stroke-size", "1px");
+
+        map.append("circle")
+            .attr("r", 10)
+            .attr("cx", 425)
+            //.attr("cy", height-215)
+            .attr("cy", 160)
+            .style("fill", "white");
+
+        map.append("circle")
+            .attr("r", 20)
+            .attr("cx", 425)
+            //.attr("cy", height-190)
+            .attr("cy", 130)
+            .style("fill", "white");
+
+        map.append("circle")
+            .attr("r", 50)
+            .attr("cx", 425)
+            //.attr("cy", height-120)
+            .attr("cy", 60)
+            .style("fill", "white");
+
+        map.append("text")
+            .attr("class", "label")
+            .attr("x", 360)
+            //.attr("y", height-212)
+            .attr("y", 165)
+            .style("text-anchor", "end")
+            .text("$650 debt per Capita");
+
+        map.append("text")
+            .attr("class", "label")
+            .attr("x", 360)
+            //.attr("y", height-187)
+            .attr("y", 130)
+            .style("text-anchor", "end")
+            .text("$5000 debt per Capita");
+
+        map.append("text")
+            .attr("class", "label")
+            .attr("x", 360)
+            //.attr("y", height-117)
+            .attr("y", 65)
+            .style("text-anchor", "end")
+            .text("$12,500 debt per Capita");
+
+        // D3 Projection
+        var projection = d3.geo.albersUsa()
+            .translate([width-200, 90])
+            .scale([300]);
+
+        // Define path generator
+        var path = d3.geo.path()
+            .projection(projection);
+
+        var colorScale = d3.scale.linear()                  .range(["#FFFFFF","#32CD32","#FF0000","#0000CD","#0000FF","#3CB371","#FFA500","#FF0000",
+            "#D2691E","#A0522D","#FFD700"]);
+
+        d3.csv("states.csv", function(data){
+            colorScale.domain([0,1,2,3,4,5,6,7,8,9,10]);
+
+            d3.json("us-states.json", function(json) {
+                // Loop through each state data value in the .csv file
+                for (var i = 0; i < data.length; i++) {
+                    // Grab State Name
+                    var dataState = data[i].state;
+                    // Grab data value 
+                    var dataValue;
+                    if (data[i].addColor == 0){
+                        dataValue = 0;
+                    }
+                    else if(data[i].addColor == 1){
+                        dataValue = 1;
+                    }
+                    else
+                        dataValue = data[i].addColor - 1;
+                    // Find the corresponding state inside the GeoJSON
+                    for (var j = 0; j < json.features.length; j++)  {
+                        var jsonState = json.features[j].properties.name;
+                        if (dataState == jsonState) {
+                            // Copy the data value into the JSON
+                            json.features[j].properties.addColor = dataValue; 
+                            // Stop looking through the JSON
+                            break;
+                        }
+                    }
+                }
+
+                // Bind the data to the SVG and create one path per GeoJSON feature
+                map.selectAll("path")
+                    .data(json.features)
+                    .enter()
+                    .append("path")
+                    .attr("d", path)
+                    .style("stroke", "#000000")
+                    .style("stroke-width", "1")
+                    .style("fill", function(d) {
+                        // Get data value
+                        var value = d.properties.addColor;
+                        if (value) {
+                            //If value exists…
+                            return colorScale(value);
+                        } else {
+                            //If value is undefined…
+                            return "#FFFFFF";
+                        }
+                    });
+            });
+        });
+        
+        // Chart dimensions.
+        var margin2 = {top: 5, right: 20, bottom: 30, left: 50},
+            width = 1024 - margin2.right - margin2.left,
+            height = 550 - margin2.top - margin2.bottom;
 
         // Various scales. These domains make assumptions of data, naturally.
         var xScale = d3.scale.linear().domain([1, 60])
@@ -461,7 +479,8 @@
         var radiusScale = d3.scale.sqrt().domain([0, 12500])
             .range([0, 50]);
         var colorScale = d3.scale.ordinal().domain(["1","2","3","4","5","6","7","8","9","10"])
-            .range(["#4169E1","#9ACD32","#DC143C","#008000","#000080","#DAA520","#FFD700","#8A2BE2","#A0522D","#F0E68C"]);
+            .range(["#32CD32","#FF0000","#0000CD","#0000FF","#3CB371","#FFA500","#FF0000",
+        "#D2691E","#A0522D","#FFD700"]);
 
         // The x & y axes.
         var xAxis = d3.svg.axis()
@@ -470,14 +489,14 @@
 
         var yAxis = d3.svg.axis()
             .scale(yScale)
-            .orient("left");*/
+            .orient("left");
 
         // Create the SVG container and set the origin.
         var svg = d3.select("#chart").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
+            .attr("width", width + margin2.left + margin2.right)
+            .attr("height", height + margin2.top + margin2.bottom)
             .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
         // Add the x-axis.
         svg.append("g")
@@ -515,239 +534,6 @@
             .attr("x", width)
             .text(2000);
 
-        // draw legend colored rectangles
-        svg.append("rect")
-            .attr("x", width-670)
-            //.attr("y", height-230)
-            .attr("y", height-500)
-            .attr("width", 220)
-            .attr("height", 270)
-            .attr("fill", "lightgrey")
-            .style("stroke-size", "1px");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-215)
-            .attr("cy", height-480)
-            .style("fill", "#4169E1");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-190)
-            .attr("cy", height-455)
-            .style("fill", "#9ACD32");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-430)
-            .style("fill", "#DC143C");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-405)
-            .style("fill", "#008000");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-380)
-            .style("fill", "#000080");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-355)
-            .style("fill", "#DAA520");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-330)
-            .style("fill", "#FFD700");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-305)
-            .style("fill", "#8A2BE2");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-280)
-            .style("fill", "#A0522D");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-255)
-            .style("fill", "#F0E68C");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-212)
-            .attr("y", height-475)
-            .style("text-anchor", "end")
-            .text("Connecticut");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-187)
-            .attr("y", height-450)
-            .style("text-anchor", "end")
-            .text("Alaska");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-425)
-            .style("text-anchor", "end")
-            .text("Massachusets");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-400)
-            .style("text-anchor", "end")
-            .text("Rhode Island");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-375)
-            .style("text-anchor", "end")
-            .text("New Jersey");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-350)
-            .style("text-anchor", "end")
-            .text("Tennessee");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-325)
-            .style("text-anchor", "end")
-            .text("Nevada");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-300)
-            .style("text-anchor", "end")
-            .text("Nebraska");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-275)
-            .style("text-anchor", "end")
-            .text("Wyoming");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-250)
-            .style("text-anchor", "end")
-            .text("Georgia");
-
-        //legend for population size
-        // draw legend colored rectangles
-        svg.append("rect")
-            .attr("x", 25)
-            //.attr("y", height-230)
-            .attr("y", 10)
-            .attr("width", 260)
-            .attr("height", 175)
-            .attr("fill", "lightgrey")
-            .style("stroke-size", "1px");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", 225)
-            //.attr("cy", height-215)
-            .attr("cy", 173)
-            .style("fill", "white");
-
-        svg.append("circle")
-            .attr("r", 20)
-            .attr("cx", 225)
-            //.attr("cy", height-190)
-            .attr("cy", 142)
-            .style("fill", "white");
-
-        svg.append("circle")
-            .attr("r", 50)
-            .attr("cx", 225)
-            //.attr("cy", height-120)
-            .attr("cy", 72)
-            .style("fill", "white");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", 160)
-            //.attr("y", height-212)
-            .attr("y", 173)
-            .style("text-anchor", "end")
-            .text("$650 debt per Capita");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", 160)
-            //.attr("y", height-187)
-            .attr("y", 147)
-            .style("text-anchor", "end")
-            .text("$5000 debt per Capita");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", 160)
-            //.attr("y", height-117)
-            .attr("y", 77)
-            .style("text-anchor", "end")
-            .text("$12,500 debt per Capita");
-
-        /*var lineData = [{x:1,y:1}, {x:10,y:10}, {x:20,y:20}, {x:30,y:30}, {x:40,y:40}, {x:50,y:50},     {x:60,y:60}];
-
-        var line = d3.svg.line()
-            .x(function(d) {
-                return xScale(d.x);
-            })
-            .y(function(d) {
-                return yScale(d.y);
-            })
-            .interpolate("basis");
-
-        svg.append("path")
-          .attr("d", line(lineData))
-          .attr("stroke", "black")
-          .attr("stroke-width", .5)
-          .attr("fill", "none");*/
-
         var div = d3.select("#chart").append("div")
             .attr("class", "tooltip")
             .style("opacity", 0);
@@ -766,7 +552,7 @@
                 .data(interpolateData(2000))
                 .enter().append("circle")
                 .attr("class", "dot")
-                .style("fill", function(d) { return colorScale(color(d)); })
+                .style("fill", function(d) { return colorScale2(color(d)); })
                 .call(position)
                 .sort(order)
                 .on("mouseover", function(d) {
@@ -891,11 +677,133 @@
     
     function showBiggest(){
         d3.select("svg").remove();
+        d3.select("svg").remove();
+        
+        // Map Dimensions
+        var width = 1100, height = 175;
+
+        // Create the SVG container and set the origin.
+        var map = d3.select("#map").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g");
+
+        //legend for population size
+        // draw legend colored rectangles
+        map.append("rect")
+            .attr("x", 225)
+            //.attr("y", height-230)
+            .attr("y", 0)
+            .attr("width", 260)
+            .attr("height", 175)
+            .attr("fill", "lightgrey")
+            .style("stroke-size", "1px");
+
+        map.append("circle")
+            .attr("r", 10)
+            .attr("cx", 425)
+            //.attr("cy", height-215)
+            .attr("cy", 160)
+            .style("fill", "white");
+
+        map.append("circle")
+            .attr("r", 20)
+            .attr("cx", 425)
+            //.attr("cy", height-190)
+            .attr("cy", 130)
+            .style("fill", "white");
+
+        map.append("circle")
+            .attr("r", 50)
+            .attr("cx", 425)
+            //.attr("cy", height-120)
+            .attr("cy", 60)
+            .style("fill", "white");
+
+        map.append("text")
+            .attr("class", "label")
+            .attr("x", 360)
+            //.attr("y", height-212)
+            .attr("y", 165)
+            .style("text-anchor", "end")
+            .text("$650 debt per Capita");
+
+        map.append("text")
+            .attr("class", "label")
+            .attr("x", 360)
+            //.attr("y", height-187)
+            .attr("y", 130)
+            .style("text-anchor", "end")
+            .text("$5000 debt per Capita");
+
+        map.append("text")
+            .attr("class", "label")
+            .attr("x", 360)
+            //.attr("y", height-117)
+            .attr("y", 65)
+            .style("text-anchor", "end")
+            .text("$12,500 debt per Capita");
+
+        // D3 Projection
+        var projection = d3.geo.albersUsa()
+            .translate([width-200, 90])
+            .scale([300]);
+
+        // Define path generator
+        var path = d3.geo.path()
+            .projection(projection);
+
+        var colorScale = d3.scale.linear()          .range(["#FFFFFF","#32CD32","#FF0000","#0000CD","#0000FF","#3CB371","#FFA500","#FF0000",
+        "#D2691E","#A0522D","#FFD700"]);
+
+        d3.csv("biggest.csv", function(data){
+            colorScale.domain([0,1,2,3,4,5,6,7,8,9,10]);
+
+            d3.json("us-states.json", function(json) {
+                // Loop through each state data value in the .csv file
+                for (var i = 0; i < data.length; i++) {
+                    // Grab State Name
+                    var dataState = data[i].state;
+                    // Grab data value 
+                    var dataValue = data[i].addColor;
+                    // Find the corresponding state inside the GeoJSON
+                    for (var j = 0; j < json.features.length; j++)  {
+                        var jsonState = json.features[j].properties.name;
+                        if (dataState == jsonState) {
+                            // Copy the data value into the JSON
+                            json.features[j].properties.addColor = dataValue; 
+                            // Stop looking through the JSON
+                            break;
+                        }
+                    }
+                }
+
+                // Bind the data to the SVG and create one path per GeoJSON feature
+                map.selectAll("path")
+                    .data(json.features)
+                    .enter()
+                    .append("path")
+                    .attr("d", path)
+                    .style("stroke", "#000000")
+                    .style("stroke-width", "1")
+                    .style("fill", function(d) {
+                        // Get data value
+                        var value = d.properties.addColor;
+                        if (value) {
+                        //If value exists…
+                        return colorScale(value);
+                        } else {
+                        //If value is undefined…
+                        return "rgb(213,222,217)";
+                        }
+                    });
+            });
+        });
         
         // Chart dimensions.
-        var margin = {top: 20, right: 40, bottom: 30, left: 50},
-            width = 1024 - margin.right,
-            height = 550 - margin.top - margin.bottom;
+        var margin2 = {top: 5, right: 20, bottom: 30, left: 50},
+            width = 1024 - margin2.right - margin2.left,
+            height = 550 - margin2.top - margin2.bottom;
 
         // Various scales. These domains make assumptions of data, naturally.
         var xScale = d3.scale.linear().domain([1, 60])
@@ -904,8 +812,8 @@
             .range([height, 0]);
         var radiusScale = d3.scale.sqrt().domain([0, 12500])
             .range([0, 50]);
-        var colorScale = d3.scale.ordinal().domain(["1","2","3","4","5"])
-            .range(["#4169E1","#9ACD32","#DC143C","#008000","#000080"]);
+        var colorScale2 = d3.scale.ordinal().domain(["1","2","3","4","5"])
+            .range(["#32CD32","#FF0000","#0000CD","#0000FF","#3CB371"]);
 
         // The x & y axes.
         var xAxis = d3.svg.axis()
@@ -918,11 +826,11 @@
 
         // Create the SVG container and set the origin.
         var svg = d3.select("#chart").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
+            .attr("width", width + margin2.left + margin2.right)
+            .attr("height", height + margin2.top + margin2.bottom)
             .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
+            .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+        
         // Add the x-axis.
         svg.append("g")
             .attr("class", "x axis")
@@ -958,153 +866,13 @@
             .attr("y", height - 24)
             .attr("x", width)
             .text(2000);
-        
-        // draw legend colored rectangles
-        svg.append("rect")
-            .attr("x", width-670)
-            //.attr("y", height-230)
-            .attr("y", height-500)
-            .attr("width", 220)
-            .attr("height", 140)
-            .attr("fill", "lightgrey")
-            .style("stroke-size", "1px");
-        
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-215)
-            .attr("cy", height-480)
-            .style("fill", "#4169E1");
 
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-190)
-            .attr("cy", height-455)
-            .style("fill", "#9ACD32");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-430)
-            .style("fill", "#DC143C");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-405)
-            .style("fill", "#008000");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-380)
-            .style("fill", "#000080");
-        
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-212)
-            .attr("y", height-475)
-            .style("text-anchor", "end")
-            .text("Connecticut");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-187)
-            .attr("y", height-450)
-            .style("text-anchor", "end")
-            .text("Alaska");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-425)
-            .style("text-anchor", "end")
-            .text("Massachusets");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-400)
-            .style("text-anchor", "end")
-            .text("Rhode Island");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-375)
-            .style("text-anchor", "end")
-            .text("New Jersey");
-
-        //legend for population size
-        // draw legend colored rectangles
-        svg.append("rect")
-            .attr("x", 25)
-            //.attr("y", height-230)
-            .attr("y", 10)
-            .attr("width", 260)
-            .attr("height", 175)
-            .attr("fill", "lightgrey")
-            .style("stroke-size", "1px");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", 225)
-            //.attr("cy", height-215)
-            .attr("cy", 173)
-            .style("fill", "white");
-
-        svg.append("circle")
-            .attr("r", 20)
-            .attr("cx", 225)
-            //.attr("cy", height-190)
-            .attr("cy", 142)
-            .style("fill", "white");
-
-        svg.append("circle")
-            .attr("r", 50)
-            .attr("cx", 225)
-            //.attr("cy", height-120)
-            .attr("cy", 72)
-            .style("fill", "white");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", 160)
-            //.attr("y", height-212)
-            .attr("y", 173)
-            .style("text-anchor", "end")
-            .text("$650 debt per Capita");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", 160)
-            //.attr("y", height-187)
-            .attr("y", 147)
-            .style("text-anchor", "end")
-            .text("$5000 debt per Capita");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", 160)
-            //.attr("y", height-117)
-            .attr("y", 77)
-            .style("text-anchor", "end")
-            .text("$12,500 debt per Capita");
-        
         var div = d3.select("#chart").append("div")
             .attr("class", "tooltip")
             .style("opacity", 0);
-        
-        d3.json("biggest.json", function(error, biggest) {
+
+        // Load the data.
+        d3.json("biggest.json", function(error, states) {
             if (error) throw error;
 
             // A bisector since many nation's data is sparsely-defined.
@@ -1117,7 +885,7 @@
                 .data(interpolateData(2000))
                 .enter().append("circle")
                 .attr("class", "dot")
-                .style("fill", function(d) { return colorScale(color(d)); })
+                .style("fill", function(d) { return colorScale2(color(d)); })
                 .call(position)
                 .sort(order)
                 .on("mouseover", function(d) {
@@ -1215,7 +983,7 @@
 
               // Interpolates the dataset for the given (fractional) year.
               function interpolateData(year) {
-                return biggest.map(function(d) {
+                return states.map(function(d) {
                   return {
                     name: d.state,
                     region: d.state,
@@ -1242,11 +1010,133 @@
 
     function showSmallest(){
         d3.select("svg").remove();
+        d3.select("svg").remove();
+        
+        // Map Dimensions
+        var width = 1100, height = 175;
 
-        /*// Chart dimensions.
-        var margin = {top: 20, right: 40, bottom: 30, left: 50},
-            width = 1024 - margin.right,
-            height = 550 - margin.top - margin.bottom;
+        // Create the SVG container and set the origin.
+        var map = d3.select("#map").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g");
+
+        //legend for population size
+        // draw legend colored rectangles
+        map.append("rect")
+            .attr("x", 225)
+            //.attr("y", height-230)
+            .attr("y", 0)
+            .attr("width", 260)
+            .attr("height", 175)
+            .attr("fill", "lightgrey")
+            .style("stroke-size", "1px");
+
+        map.append("circle")
+            .attr("r", 10)
+            .attr("cx", 425)
+            //.attr("cy", height-215)
+            .attr("cy", 160)
+            .style("fill", "white");
+
+        map.append("circle")
+            .attr("r", 20)
+            .attr("cx", 425)
+            //.attr("cy", height-190)
+            .attr("cy", 130)
+            .style("fill", "white");
+
+        map.append("circle")
+            .attr("r", 50)
+            .attr("cx", 425)
+            //.attr("cy", height-120)
+            .attr("cy", 60)
+            .style("fill", "white");
+
+        map.append("text")
+            .attr("class", "label")
+            .attr("x", 360)
+            //.attr("y", height-212)
+            .attr("y", 165)
+            .style("text-anchor", "end")
+            .text("$650 debt per Capita");
+
+        map.append("text")
+            .attr("class", "label")
+            .attr("x", 360)
+            //.attr("y", height-187)
+            .attr("y", 130)
+            .style("text-anchor", "end")
+            .text("$5000 debt per Capita");
+
+        map.append("text")
+            .attr("class", "label")
+            .attr("x", 360)
+            //.attr("y", height-117)
+            .attr("y", 65)
+            .style("text-anchor", "end")
+            .text("$12,500 debt per Capita");
+
+        // D3 Projection
+        var projection = d3.geo.albersUsa()
+            .translate([width-200, 90])
+            .scale([300]);
+
+        // Define path generator
+        var path = d3.geo.path()
+            .projection(projection);
+
+        var colorScale = d3.scale.linear()          .range(["#FFFFFF","#32CD32","#FF0000","#0000CD","#0000FF","#3CB371","#FFA500","#FF0000",
+        "#D2691E","#A0522D","#FFD700"]);
+
+        d3.csv("smallest.csv", function(data){
+            colorScale.domain([0,1,2,3,4,5,6,7,8,9,10]);
+
+            d3.json("us-states.json", function(json) {
+                // Loop through each state data value in the .csv file
+                for (var i = 0; i < data.length; i++) {
+                    // Grab State Name
+                    var dataState = data[i].state;
+                    // Grab data value 
+                    var dataValue = data[i].addColor;
+                    // Find the corresponding state inside the GeoJSON
+                    for (var j = 0; j < json.features.length; j++)  {
+                        var jsonState = json.features[j].properties.name;
+                        if (dataState == jsonState) {
+                            // Copy the data value into the JSON
+                            json.features[j].properties.addColor = dataValue; 
+                            // Stop looking through the JSON
+                            break;
+                        }
+                    }
+                }
+
+                // Bind the data to the SVG and create one path per GeoJSON feature
+                map.selectAll("path")
+                    .data(json.features)
+                    .enter()
+                    .append("path")
+                    .attr("d", path)
+                    .style("stroke", "#000000")
+                    .style("stroke-width", "1")
+                    .style("fill", function(d) {
+                        // Get data value
+                        var value = d.properties.addColor;
+                        if (value) {
+                        //If value exists…
+                        return colorScale(value);
+                        } else {
+                        //If value is undefined…
+                        return "rgb(213,222,217)";
+                        }
+                    });
+            });
+        });
+
+        // Chart dimensions.
+        var margin2 = {top: 5, right: 20, bottom: 30, left: 50},
+            width = 1024 - margin2.right - margin2.left,
+            height = 550 - margin2.top - margin2.bottom;
 
         // Various scales. These domains make assumptions of data, naturally.
         var xScale = d3.scale.linear().domain([1, 60])
@@ -1255,8 +1145,8 @@
             .range([height, 0]);
         var radiusScale = d3.scale.sqrt().domain([0, 12500])
             .range([0, 50]);
-        var colorScale = d3.scale.ordinal().domain(["1","2","3","4","5","6","7","8","9","10"])
-        .range(["#4169E1","#9ACD32","#DC143C","#008000","#000080","#DAA520","#FFD700","#8A2BE2","#A0522D","#F0E68C"]);
+        var colorScale2 = d3.scale.ordinal().domain(["1","2","3","4","5"])
+        .range(["#FFA500","#FF0000","#D2691E","#A0522D","#FFD700"]);
 
         // The x & y axes.
         var xAxis = d3.svg.axis()
@@ -1265,15 +1155,15 @@
 
         var yAxis = d3.svg.axis()
             .scale(yScale)
-            .orient("left");*/
+            .orient("left");
 
         // Create the SVG container and set the origin.
         var svg = d3.select("#chart").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
+            .attr("width", width + margin2.left + margin2.right)
+            .attr("height", height + margin2.top + margin2.bottom)
             .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
+            .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+        
         // Add the x-axis.
         svg.append("g")
             .attr("class", "x axis")
@@ -1309,153 +1199,13 @@
             .attr("y", height - 24)
             .attr("x", width)
             .text(2000);
-        
-        // draw legend colored rectangles
-        svg.append("rect")
-            .attr("x", width-670)
-            //.attr("y", height-230)
-            .attr("y", height-500)
-            .attr("width", 220)
-            .attr("height", 140)
-            .attr("fill", "lightgrey")
-            .style("stroke-size", "1px");
-        
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-215)
-            .attr("cy", height-480)
-            .style("fill", "#DAA520");
 
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-190)
-            .attr("cy", height-455)
-            .style("fill", "#FFD700");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-430)
-            .style("fill", "#8A2BE2");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-405)
-            .style("fill", "#A0522D");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", width-470)
-            //.attr("cy", height-120)
-            .attr("cy", height-380)
-            .style("fill", "#F0E68C");
-        
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-212)
-            .attr("y", height-475)
-            .style("text-anchor", "end")
-            .text("Tennessee");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-187)
-            .attr("y", height-450)
-            .style("text-anchor", "end")
-            .text("Nevada");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-425)
-            .style("text-anchor", "end")
-            .text("Nebraska");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-400)
-            .style("text-anchor", "end")
-            .text("Wyoming");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", width -520)
-            //.attr("y", height-117)
-            .attr("y", height-375)
-            .style("text-anchor", "end")
-            .text("Georgia");
-
-        //legend for population size
-        // draw legend colored rectangles
-        svg.append("rect")
-            .attr("x", 25)
-            //.attr("y", height-230)
-            .attr("y", 10)
-            .attr("width", 260)
-            .attr("height", 175)
-            .attr("fill", "lightgrey")
-            .style("stroke-size", "1px");
-
-        svg.append("circle")
-            .attr("r", 10)
-            .attr("cx", 225)
-            //.attr("cy", height-215)
-            .attr("cy", 173)
-            .style("fill", "white");
-
-        svg.append("circle")
-            .attr("r", 20)
-            .attr("cx", 225)
-            //.attr("cy", height-190)
-            .attr("cy", 142)
-            .style("fill", "white");
-
-        svg.append("circle")
-            .attr("r", 50)
-            .attr("cx", 225)
-            //.attr("cy", height-120)
-            .attr("cy", 72)
-            .style("fill", "white");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", 160)
-            //.attr("y", height-212)
-            .attr("y", 173)
-            .style("text-anchor", "end")
-            .text("$650 debt per Capita");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", 160)
-            //.attr("y", height-187)
-            .attr("y", 147)
-            .style("text-anchor", "end")
-            .text("$5000 debt per Capita");
-
-        svg.append("text")
-            .attr("class", "label")
-            .attr("x", 160)
-            //.attr("y", height-117)
-            .attr("y", 77)
-            .style("text-anchor", "end")
-            .text("$12,500 debt per Capita");
-        
         var div = d3.select("#chart").append("div")
             .attr("class", "tooltip")
             .style("opacity", 0);
-        
-        d3.json("smallest.json", function(error, smallest) {
+
+        // Load the data.
+        d3.json("smallest.json", function(error, states) {
             if (error) throw error;
 
             // A bisector since many nation's data is sparsely-defined.
@@ -1468,7 +1218,7 @@
                 .data(interpolateData(2000))
                 .enter().append("circle")
                 .attr("class", "dot")
-                .style("fill", function(d) { return colorScale(color(d)); })
+                .style("fill", function(d) { return colorScale2(color(d)); })
                 .call(position)
                 .sort(order)
                 .on("mouseover", function(d) {
@@ -1566,7 +1316,7 @@
 
               // Interpolates the dataset for the given (fractional) year.
               function interpolateData(year) {
-                return smallest.map(function(d) {
+                return states.map(function(d) {
                   return {
                     name: d.state,
                     region: d.state,
@@ -1589,7 +1339,6 @@
                 return a[1];
               }
         });
-    }
-
+    };
 
 
