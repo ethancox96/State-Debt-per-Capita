@@ -16,7 +16,7 @@
 
     // D3 Projection
     var projection = d3.geo.albersUsa()
-        .translate([width/2, 65])
+        .translate([width-150, 65])
         .scale([250]);
 
     // Define path generator
@@ -348,7 +348,7 @@
 
         // D3 Projection
         var projection = d3.geo.albersUsa()
-            .translate([width/2, 65])
+            .translate([width-150, 65])
             .scale([250]);
 
         // Define path generator
@@ -690,7 +690,7 @@
 
         // D3 Projection
         var projection = d3.geo.albersUsa()
-            .translate([width/2, 65])
+            .translate([width-150, 65])
             .scale([250]);
 
         // Define path generator
@@ -1024,7 +1024,7 @@
 
         // D3 Projection
         var projection = d3.geo.albersUsa()
-            .translate([width/2, 65])
+            .translate([width - 150, 65])
             .scale([250]);
 
         // Define path generator
